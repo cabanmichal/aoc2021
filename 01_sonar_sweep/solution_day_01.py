@@ -29,7 +29,7 @@ def count_increases(depths: List[int], window: int = 1) -> int:
 
 
 if __name__ == "__main__":
-    solution1 = count_increases(get_input("input.txt"))
-    print(f"Solution 1: {solution1}")
-    solution2 = count_increases(get_input("input.txt"), window=3)
-    print(f"Solution 2: {solution2}")
+    depths = get_input("input.txt")
+    for idx, window in enumerate([1, 3]):
+        solution = count_increases(depths, window)
+        print(f"Solution {idx+1}: {solution}")  # 1548, 1589

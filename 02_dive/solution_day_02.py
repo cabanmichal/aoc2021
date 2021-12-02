@@ -60,9 +60,8 @@ def load_moves(file: str = "input.txt") -> List[Move]:
 
 if __name__ == "__main__":
     moves = load_moves("input.txt")
-
     for idx, position in enumerate([Position(), AimedPosition()]):
         for move in moves:
             position.move(move)
         solution = position.vertical * position.horizontal
-        print(f"Solution {idx+1}: {solution}")
+        print(f"Solution {idx+1}: {solution:10}")  # 1670340, 1954293920
