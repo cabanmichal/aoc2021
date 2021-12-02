@@ -14,9 +14,8 @@ class Move:
 class Position:
     horizontal: int = 0
     vertical: int = 0
-    aim: int = 0
 
-    def move_simple(self, where: Move) -> None:
+    def move(self, where: Move) -> None:
         direction = where.direction
         steps = where.steps
         if direction == "up":
@@ -28,7 +27,12 @@ class Position:
         else:
             raise ValueError(f"Unknown direction: {direction}")
 
-    def move_with_aim(self, where: Move) -> None:
+
+@dataclass
+class AimedPosition(Position):
+    aim: int = 0
+
+    def move(self, where: Move) -> None:
         direction = where.direction
         steps = where.steps
         if direction == "up":
@@ -57,14 +61,8 @@ def load_moves(file: str = "input.txt") -> List[Move]:
 if __name__ == "__main__":
     moves = load_moves("input.txt")
 
-    position = Position()
-    for move in moves:
-        position.move_simple(move)
-    solution1 = position.vertical * position.horizontal
-    print(f"Solution 1: {solution1}")
-
-    position = Position()
-    for move in moves:
-        position.move_with_aim(move)
-    solution2 = position.vertical * position.horizontal
-    print(f"Solution 2: {solution2}")
+    for idx, position in enumerate([Position(), AimedPosition()]):
+        for move in moves:
+            position.move(move)
+        solution = position.vertical * position.horizontal
+        print(f"Solution {idx+1}: {solution}")
