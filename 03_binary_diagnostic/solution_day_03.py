@@ -2,20 +2,19 @@
 
 from typing import Callable, List
 
-TCountFunc = Callable[[int, int], str]
+TCountFunc = Callable[[int], str]
 
 
 class BitCounter:
     def __init__(self, width: int) -> None:
-        self.zeros = [0] * width
-        self.ones = [0] * width
+        self.counter = [0] * width
 
     def add_number(self, number: str) -> None:
         for idx, value in enumerate(number):
             if value == "0":
-                self.zeros[idx] += 1
+                self.counter[idx] -= 1
             elif value == "1":
-                self.ones[idx] += 1
+                self.counter[idx] += 1
             else:
                 raise ValueError(f"Incorrect format: {number}")
 
@@ -24,29 +23,19 @@ class BitCounter:
             self.add_number(number)
 
     def _process_counts(self, func: TCountFunc) -> str:
-        """Provide value for counts of zeros and ones at each index."""
-        values = [func(*counts) for counts in zip(self.zeros, self.ones)]
+        """Provide value for count at each index."""
+        values = [func(count) for count in self.counter]
         return "".join(values)
 
     def most_common(self, on_equal: str = "1") -> str:
-        def func(zeros: int, ones: int) -> str:
-            if zeros > ones:
-                return "0"
-            if ones > zeros:
-                return "1"
-            return on_equal
-
-        return self._process_counts(func)
+        return self._process_counts(
+            lambda c: "0" if c < 0 else "1" if c > 0 else on_equal
+        )
 
     def least_common(self, on_equal: str = "0") -> str:
-        def func(zeros: int, ones: int) -> str:
-            if zeros < ones:
-                return "0"
-            if ones < zeros:
-                return "1"
-            return on_equal
-
-        return self._process_counts(func)
+        return self._process_counts(
+            lambda c: "1" if c < 0 else "0" if c > 0 else on_equal
+        )
 
 
 class ReportAnalyzer:
