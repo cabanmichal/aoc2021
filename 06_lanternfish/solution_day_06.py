@@ -3,19 +3,25 @@
 from typing import List
 
 
-def get_fish_count(initial_state: List[int], days: int, r: int = 9, p: int = 7) -> int:
-    counter = [0] * r
+def get_fish_count(
+    initial_state: List[int],
+    days: int,
+    first_child_days: int = 9,
+    other_child_days: int = 7,
+) -> int:
+    """Calculate number of fish after given number of days."""
+    counter = [0] * first_child_days  # counter for all possible timer states
     for fish in initial_state:
         counter[fish] += 1
 
-    for d in range(days):
+    for _ in range(days):
         new_fish = counter[0]
         i = 1
         while i < len(counter):
             counter[i - 1] = counter[i]
             i += 1
-        counter[p - 1] += new_fish
-        counter[r - 1] = new_fish
+        counter[other_child_days - 1] += new_fish
+        counter[first_child_days - 1] = new_fish
 
     return sum(counter)
 
