@@ -22,7 +22,7 @@ TEntry = Tuple[List[str], List[str]]
 
 
 def wires_to_digits(patterns: List[str]) -> Dict[str, str]:
-    """Return mapping of control wires to digits.
+    """Return mapping of scrambled control wires to "easy digits" (1, 4, 7, 8).
 
     Keys are sorted by length.
     """
@@ -37,7 +37,7 @@ def wires_to_digits(patterns: List[str]) -> Dict[str, str]:
 
 
 def wires_to_possible_segments(patterns: List[str]) -> Dict[str, List[str]]:
-    """Return mapping of wires to possible segments.
+    """Return mapping of single control wires to possible segments.
 
     Keys are sorted alphabetically.
     """
@@ -64,7 +64,7 @@ def is_digit_valid(segments: str) -> bool:
 
 
 def wires_to_correct_segments(patterns: List[str]) -> Dict[str, str]:
-    """Return mapping of each wire to correct segment."""
+    """Return mapping of each control wire to correct segment."""
     mapping = wires_to_possible_segments(patterns)
     for segments in itertools.product(*mapping.values()):
         single_segment_mapping = dict(zip(WIRES, segments))
