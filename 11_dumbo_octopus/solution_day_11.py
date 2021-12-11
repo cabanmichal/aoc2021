@@ -2,7 +2,7 @@
 
 import copy
 from collections import deque
-from typing import List, Tuple, Set, Deque
+from typing import List, Tuple, Set, Deque, Iterable
 
 TPoint = Tuple[int, int]
 
@@ -30,21 +30,30 @@ class OctopusGrid:
 
         return neighbors
 
-    def make_step(self) -> int:
-        # increase energy level of all octopuses by 1
+    def increase_energy_by_one(self) -> None:
         for r in range(self.height):
             for c in range(self.width):
                 self.grid[r][c] += 1
 
-        # find octopuses that are about to flash
-        flashed: Set[TPoint] = set()
+    def find_octopuses_to_flash(self) -> Deque[TPoint]:
         to_flash: Deque[TPoint] = deque()
         for r in range(self.height):
             for c in range(self.width):
                 if self.grid[r][c] > 9:
                     to_flash.append((r, c))
 
-        # while there are octopuses to be flashed, flash them
+        return to_flash
+
+    def set_flashed_to_zero(self, flashed: Iterable[TPoint]) -> None:
+        for r, c in flashed:
+            self.grid[r][c] = 0
+
+    def make_step(self) -> int:
+        self.increase_energy_by_one()
+
+        # while there are new octopuses to be flashed, flash them
+        flashed: Set[TPoint] = set()
+        to_flash = self.find_octopuses_to_flash()
         while to_flash:
             octopus = to_flash.popleft()
             if octopus in flashed:
@@ -56,9 +65,7 @@ class OctopusGrid:
                 if self.grid[r][c] > 9 and neighbor not in flashed:
                     to_flash.append(neighbor)
 
-        # set energy level of flashed octopuses to 0
-        for r, c in flashed:
-            self.grid[r][c] = 0
+        self.set_flashed_to_zero(flashed)
 
         return len(flashed)
 
