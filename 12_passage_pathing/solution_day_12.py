@@ -76,7 +76,7 @@ class ReviewedPathFinder(PathFinder):
         if not visit_count:
             return True
 
-        # all cases below are for already caves visited at least once
+        # all cases below are for caves already visited at least once
         if self.is_cave_endpoint(cave):
             return False
 
