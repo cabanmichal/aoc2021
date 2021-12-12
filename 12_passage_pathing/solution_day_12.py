@@ -59,9 +59,7 @@ class PathFinder:
 
     @staticmethod
     def is_cave_small(cave: TCave) -> bool:
-        if cave.lower() == cave and not PathFinder.is_cave_endpoint(cave):
-            return True
-        return False
+        return cave.lower() == cave and not PathFinder.is_cave_endpoint(cave)
 
     @staticmethod
     def is_cave_endpoint(cave: TCave) -> bool:
