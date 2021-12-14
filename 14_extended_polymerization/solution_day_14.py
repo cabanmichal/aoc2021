@@ -30,9 +30,9 @@ class Polymer:
 
         return counter
 
-    def make_n_steps(self, max_step: int) -> None:
+    def make_n_steps(self, n: int) -> None:
         counter = dict(Counter(self.get_pairs(self.polymer)))
-        for _ in range(max_step):
+        for _ in range(n):
             counter = self.make_step(counter)
 
     def most_common_least_common_diff(self) -> int:
