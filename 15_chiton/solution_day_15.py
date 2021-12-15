@@ -12,8 +12,7 @@ class Cave:
         self.width = len(risk_map[0])
         self.height = len(risk_map)
         self.start = (0, 0)
-        self.goal = (self.width - 1, self.height - 1)
-        self.multiplier = 5
+        self.multiplier = 1
         self.risk_wrap = 9
 
     def child_parent_map(self) -> Dict[TPoint, TPoint]:
@@ -55,9 +54,8 @@ class Cave:
         """List of points from start to goal."""
         path: List[TPoint] = []
         parent_map = self.child_parent_map()
-        x, y = self.goal
-        x = (x + 1) * self.multiplier - 1
-        y = (y + 1) * self.multiplier - 1
+        x = self.width * self.multiplier - 1
+        y = self.height * self.multiplier - 1
         current = (x, y)
         while current != self.start:
             path.append(current)
