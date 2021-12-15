@@ -19,7 +19,12 @@ class Cave:
     def child_parent_map(self) -> Dict[TPoint, TPoint]:
         """Get map of nodes to their "parents" that are closest to start.
 
-        Using Dijkstra's algorithm, no optimizations."""
+        Using Dijkstra's algorithm, no optimizations.
+        Might be probably solved easier taking into account that we're moving
+        diagonally:
+        we can solve recursively for row + 1, column + 1 taking minimum of these
+        two solutions as a risk...
+        """
         start = self.start
 
         # map of points to the parents that take them fastest to start
