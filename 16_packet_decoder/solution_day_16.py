@@ -2,6 +2,7 @@
 
 from abc import ABC, abstractmethod
 from typing import Tuple, List
+import math
 
 
 class Packet(ABC):
@@ -26,6 +27,29 @@ class Packet(ABC):
             total += child.version_sum()
 
         return total
+
+    def get_value(self) -> int:
+        if not self.children:
+            return self.value
+
+        if self.type_id == 0:
+            return sum(c.get_value() for c in self.children)
+        if self.type_id == 1:
+            return math.prod(c.get_value() for c in self.children)
+        if self.type_id == 2:
+            return min(c.get_value() for c in self.children)
+        if self.type_id == 3:
+            return max(c.get_value() for c in self.children)
+
+        first, second, *_ = self.children
+        if self.type_id == 5:
+            return int(first.get_value() > second.get_value())
+        if self.type_id == 6:
+            return int(first.get_value() < second.get_value())
+        if self.type_id == 7:
+            return int(first.get_value() == second.get_value())
+
+        raise ValueError(f"Unknown type id: {self.type_id}")
 
 
 class PacketLiteral(Packet):
@@ -138,3 +162,4 @@ if __name__ == "__main__":
     packet = packet_factory(initial_bits)
     packet.make_children()
     print(packet.version_sum())  # 951
+    print(packet.get_value())  # 902198718880
