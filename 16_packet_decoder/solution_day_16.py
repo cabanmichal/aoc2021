@@ -1,6 +1,7 @@
 """https://adventofcode.com/2021/day/16"""
 
 import math
+import operator
 from abc import ABC, abstractmethod
 from typing import Tuple, List
 
@@ -11,15 +12,11 @@ class Packet(ABC):
         self.type_id = type_id
         self.bits = bits
         self.children: List["Packet"] = []
-        self.consumed_by_children = 0
+        self.length: int = 0
 
     @abstractmethod
-    def trailing_data(self) -> str:
-        """Return bits that should be used for parsing other Packets."""
-
-    @abstractmethod
-    def make_children(self) -> str:
-        """Create child Packets and return bits they didn't use."""
+    def make_children(self) -> None:
+        """Create child Packets."""
 
     def version_sum(self) -> int:
         """Solution to part 1."""
@@ -34,30 +31,31 @@ class Packet(ABC):
         if not self.children:
             raise ValueError("Cannot compute value without children.")
 
+        child_values = (c.get_value() for c in self.children)
         if self.type_id == 0:
-            return sum(c.get_value() for c in self.children)
-        if self.type_id == 1:
-            return math.prod(c.get_value() for c in self.children)
-        if self.type_id == 2:
-            return min(c.get_value() for c in self.children)
-        if self.type_id == 3:
-            return max(c.get_value() for c in self.children)
+            value = sum(child_values)
+        elif self.type_id == 1:
+            value = math.prod(child_values)
+        elif self.type_id == 2:
+            value = min(child_values)
+        elif self.type_id == 3:
+            value = max(child_values)
+        elif self.type_id == 5:
+            value = int(operator.gt(*child_values))
+        elif self.type_id == 6:
+            value = int(operator.lt(*child_values))
+        elif self.type_id == 7:
+            value = int(operator.eq(*child_values))
+        else:
+            raise ValueError(f"Unknown type id: {self.type_id}")
 
-        first, second, *_ = self.children
-        if self.type_id == 5:
-            return int(first.get_value() > second.get_value())
-        if self.type_id == 6:
-            return int(first.get_value() < second.get_value())
-        if self.type_id == 7:
-            return int(first.get_value() == second.get_value())
-
-        raise ValueError(f"Unknown type id: {self.type_id}")
+        return value
 
 
 class LiteralPacket(Packet):
     def __init__(self, version: int, type_id: int, bits: str) -> None:
         super().__init__(version, type_id, bits)
-        self._value, self._data_size = self._parse_data()
+        self.length, self._value = self._parse_data()
 
     def _parse_data(self) -> Tuple[int, int]:
         bit_groups = []
@@ -68,16 +66,13 @@ class LiteralPacket(Packet):
                 break
 
         bit_string = "".join(bit_groups)
+        length = 6 + len(bit_string) + len(bit_groups)
         value = int(bit_string, 2)
-        data_size = 6 + len(bit_string) + len(bit_groups)
 
-        return value, data_size
+        return length, value
 
-    def trailing_data(self) -> str:
-        return self.bits[self._data_size :]
-
-    def make_children(self) -> str:
-        return self.trailing_data()
+    def make_children(self) -> None:
+        pass
 
     def get_value(self) -> int:
         return self._value
@@ -88,28 +83,21 @@ class OperatorPacket(Packet):
         self, version: int, type_id: int, bits: str, type_bits_count: int
     ) -> None:
         super().__init__(version, type_id, bits)
-        self.type_bits_count = type_bits_count
-        self.children_stop_value = int(
-            self.bits[6 + 1 : 6 + 1 + self.type_bits_count], 2
-        )
+        self.header_length = 6 + 1 + type_bits_count
+        self.length = self.header_length
+        self.children_stop_value = int(self.bits[6 + 1 : self.header_length], 2)
 
     @abstractmethod
     def should_make_more_children(self) -> bool:
         ...
 
-    def trailing_data(self) -> str:
-        i = 6 + 1 + self.type_bits_count
-        return self.bits[i:]
-
-    def make_children(self) -> str:
-        data = self.trailing_data()
+    def make_children(self) -> None:
         while self.should_make_more_children():
+            data = self.bits[self.length :]
             child = packet_factory(data)
+            child.make_children()
             self.children.append(child)
-            data_after_child = child.make_children()
-            self.consumed_by_children += len(data) - len(data_after_child)
-            data = data_after_child
-        return self.trailing_data()[self.consumed_by_children :]
+            self.length += child.length
 
 
 class OperatorPacket0(OperatorPacket):
@@ -117,7 +105,7 @@ class OperatorPacket0(OperatorPacket):
         super().__init__(version, type_id, bits, 15)
 
     def should_make_more_children(self) -> bool:
-        return self.consumed_by_children < self.children_stop_value
+        return (self.length - self.header_length) < self.children_stop_value
 
 
 class OperatorPacket1(OperatorPacket):
