@@ -135,18 +135,9 @@ def read_header(bits: str) -> Tuple[int, int]:
     return version, type_id
 
 
-def padded_length(number: int, chunk_size: int = 4) -> int:
-    """Return closest gte multiple of chunk_size."""
-    full, rem = divmod(number, chunk_size)
-    return (full + 1) * chunk_size if rem else full * chunk_size
-
-
 def parse_input(file: str = "input.txt") -> str:
     with open(file, "r", encoding="utf-8") as fin:
-        bit_string = bin(int(fin.readline().strip(), 16))[2:]
-        bit_string = bit_string.zfill(padded_length(len(bit_string)))
-
-        return bit_string
+        return bin(int(fin.readline().strip(), 16))[2:]
 
 
 if __name__ == "__main__":
